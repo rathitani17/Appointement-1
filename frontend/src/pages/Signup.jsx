@@ -6,6 +6,7 @@ import uploadImageToCloudinary from "../utils/uploadCloudinary";
 import { BASE_URL } from "../../config.js";
 import {toast} from 'react-toastify';
 import HashLoader from "react-spinners/HashLoader";
+import axios from 'axios';
 
 const Signup = () => {
   const[selectedFile,setSelectedFile]=useState(null);
@@ -36,10 +37,11 @@ const Signup = () => {
 
 const submitHandler=async (event)=>{
   event.preventDefault();
+  console.log(formData);
   axios.post('http://localhost:5000/api/v1/auth/register',formData)
   setLoading(true);
   try{
-    const res = await fetch("${BASE_URL}/auth/register",{
+    const res = await fetch(`${BASE_URL}/auth/register`,{
       method:'post',
 
       headers:{
@@ -48,7 +50,9 @@ const submitHandler=async (event)=>{
       body: JSON.stringify(formData)
     }
   );
+  console.log(res);
   const {message}=await res.json()
+  console.log(message);
   if(!res.ok){
     throw new Error(message)
   }

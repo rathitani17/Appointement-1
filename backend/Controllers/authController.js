@@ -3,6 +3,7 @@ import Doctor from "../models/DoctorSchema.js";
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 const generateToken = (user) => {
+    console.log(process.env.JWT_SECRET_KEY);
     return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET_KEY, {
         expiresIn: "15d",
 
@@ -54,19 +55,22 @@ export const register = async (req, res) => {
 
         await newUser.save(); // Save the new user document
 
-        res.status(200).json({ success: true, message: "User created successfully" });
+        return res.status(200).json({ success: true, message: "User created successfully" });
 
     } catch (err) {
         console.error(err); // Log the error for debugging purposes
-        res.status(500).json({ success: false, message: "Internal server error, Try again" });
+        return res.status(500).json({ success: false, message: "Internal server error, Try again" });
     }
 };
 
 export const login = async (req, res) => {
+    console.log(req);
     const { email } = req.body;
+    console.log(email);
     try {
         let user = null
         const patient = await User.findOne({ email });
+        console.log(patient);
         const doctor = await Doctor.findOne({ email });
         if (patient) {
             user = patient
@@ -78,12 +82,13 @@ export const login = async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
         const isPasswordMatch = await bcrypt.compare(req.body.password, user.password);
+        console.log(isPasswordMatch);
         if (!isPasswordMatch) {
             return res.status(400).json({ success: false, message: "Invalid credentials" });
         }
         const token = generateToken(user);
         const { password, role, appointments, ...rest } = user._doc
-        res.status(200).json({ success: true, message: "Successfully logged in", token, data: { ...rest }, role });
+        return res.status(200).json({ success: true, message: "Successfully logged in", token, data: { ...rest }, role });
     } catch (err) {
         console.error(err); // Log the error for debugging purposes
         res.status(500).json({ success: false, message: "Failed to login" });
